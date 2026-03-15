@@ -77,8 +77,14 @@ async def main():
 
         await bot.start(os.getenv("DISCORD_TOKEN"))
 
+_primeiro_ready = True
+
 @bot.event
 async def on_ready():
+    global _primeiro_ready
+    if not _primeiro_ready:
+        return
+    _primeiro_ready = False
     print(f"\n🤖  Championship BOT online: {bot.user}")
     print(f"📡  Servidores: {[g.name for g in bot.guilds]}\n")
 
