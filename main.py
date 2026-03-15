@@ -117,7 +117,7 @@ async def on_ready():
         if cog_campeonatos: await cog_campeonatos.postar_embed_gestao(guild)
         if cog_resultados:  await cog_resultados.postar_embed_provas(guild)
         if cog_suporte:     await cog_suporte.postar_embed_suporte(guild)
-        if cog_ranking:     await cog_ranking.postar_embed_ranking(guild)
+        # ranking só via comando /ranking — sem auto-post
         if cog_utilidades:
             await cog_utilidades.postar_regras(guild)
             await cog_utilidades.postar_como_participar(guild)
