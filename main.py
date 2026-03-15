@@ -16,21 +16,39 @@ if IS_RENDER:
     from http.server import HTTPServer, BaseHTTPRequestHandler
     import threading
 
-    class KeepAlive(BaseHTTPRequestHandler):
+    class PingHandler(BaseHTTPRequestHandler):
         def do_GET(self):
             self.send_response(200)
             self.end_headers()
-            self.wfile.write(b"Championship BOT online")
+            self.wfile.write(b"Championship BOT - Online!")
+        def do_HEAD(self):
+            self.send_response(200)
+            self.end_headers()
         def log_message(self, *args):
             pass
 
     def start_keepalive():
         port = int(os.getenv("PORT", 8080))
-        server = HTTPServer(("0.0.0.0", port), KeepAlive)
+        server = HTTPServer(("0.0.0.0", port), PingHandler)
         threading.Thread(target=server.serve_forever, daemon=True).start()
-        print(f"🔄  Keep-alive ativo na porta {port}")
+        print(f"🌐  Servidor web interno iniciado na porta {port}")
 
     start_keepalive()
+
+async def autoping():
+    """Pinga a cada 5 minutos para manter o Render acordado."""
+    import aiohttp
+    ping_url = os.getenv("BOT_PING", "http://localhost:8080")
+    print(f"🏓  Autoping configurado para: {ping_url}")
+    await asyncio.sleep(60)  # aguarda 1 min antes do primeiro ping
+    while True:
+        try:
+            async with aiohttp.ClientSession() as session:
+                async with session.get(ping_url) as resp:
+                    print(f"🏓  Autoping OK — status {resp.status}")
+        except Exception as e:
+            print(f"  ⚠️  Autoping falhou: {e}")
+        await asyncio.sleep(300)  # 5 minutos
 
 intents = discord.Intents.all()
 bot = commands.Bot(command_prefix="!", intents=intents)
@@ -63,6 +81,10 @@ async def main():
 async def on_ready():
     print(f"\n🤖  Championship BOT online: {bot.user}")
     print(f"📡  Servidores: {[g.name for g in bot.guilds]}\n")
+
+    # Inicia autoping só no Render
+    if IS_RENDER:
+        asyncio.create_task(autoping())
 
     for guild in bot.guilds:
         try:
