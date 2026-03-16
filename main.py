@@ -112,20 +112,36 @@ async def on_ready():
     cog_staff       = bot.cogs.get("PainelStaffCog")
 
     for guild in bot.guilds:
-        if cog_registro:    await cog_registro.postar_embed_registro(guild)
-        if cog_times:       await cog_times.postar_embed_times(guild)
-        if cog_campeonatos: await cog_campeonatos.postar_embed_gestao(guild)
-        if cog_resultados:  await cog_resultados.postar_embed_provas(guild)
-        if cog_suporte:     await cog_suporte.postar_embed_suporte(guild)
+        # Delay entre cada postagem para evitar rate limit do Discord
+        if cog_registro:
+            await cog_registro.postar_embed_registro(guild)
+            await asyncio.sleep(2)
+        if cog_times:
+            await cog_times.postar_embed_times(guild)
+            await asyncio.sleep(2)
+        if cog_campeonatos:
+            await cog_campeonatos.postar_embed_gestao(guild)
+            await asyncio.sleep(2)
+        if cog_resultados:
+            await cog_resultados.postar_embed_provas(guild)
+            await asyncio.sleep(2)
+        if cog_suporte:
+            await cog_suporte.postar_embed_suporte(guild)
+            await asyncio.sleep(2)
         # ranking só via comando /ranking — sem auto-post
         if cog_utilidades:
             await cog_utilidades.postar_regras(guild)
+            await asyncio.sleep(2)
             await cog_utilidades.postar_como_participar(guild)
+            await asyncio.sleep(2)
             await cog_utilidades.postar_premiacoes(guild)
+            await asyncio.sleep(2)
             await cog_utilidades.postar_embed_br(guild)
+            await asyncio.sleep(2)
 
-    # Painel staff usa ID fixo do canal — não precisa iterar por guild
+    # Painel staff usa ID fixo do canal
     if cog_staff:
+        await asyncio.sleep(2)
         await cog_staff.postar_painel_staff()
 
 asyncio.run(main())
