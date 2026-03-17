@@ -372,5 +372,49 @@ class UtilidadesCog(commands.Cog):
         await canal.send(embed=embed)
         print(f"  📨  Embed BR informativa postada em {guild.name}")
 
+    @app_commands.command(name="setup-embeds", description="[ADMIN] Posta todas as embeds nos canais corretos.")
+    @app_commands.checks.has_permissions(administrator=True)
+    async def setup_embeds(self, interaction: discord.Interaction):
+        guild = interaction.guild
+        await interaction.response.send_message("⏳ Postando embeds... aguarde.", ephemeral=True)
+
+        from cogs.registro import RegistroCog
+        from cogs.times import TimesCog
+        from cogs.campeonatos import CampeonatosCog
+        from cogs.resultados import ResultadosCog
+        from cogs.suporte import SuporteCog
+        from cogs.painel_staff import PainelStaffCog
+
+        etapas = [
+            ("registro",    interaction.client.cogs.get("RegistroCog"),    "postar_embed_registro",    guild),
+            ("times",       interaction.client.cogs.get("TimesCog"),       "postar_embed_times",       guild),
+            ("gestão",      interaction.client.cogs.get("CampeonatosCog"), "postar_embed_gestao",      guild),
+            ("provas",      interaction.client.cogs.get("ResultadosCog"),  "postar_embed_provas",      guild),
+            ("suporte",     interaction.client.cogs.get("SuporteCog"),     "postar_embed_suporte",     guild),
+            ("regras",      self,                                           "postar_regras",            guild),
+            ("como-part.",  self,                                           "postar_como_participar",   guild),
+            ("premiações",  self,                                           "postar_premiacoes",        guild),
+            ("BR",          self,                                           "postar_embed_br",          guild),
+        ]
+
+        for nome, cog, metodo, arg in etapas:
+            if cog and hasattr(cog, metodo):
+                try:
+                    await getattr(cog, metodo)(arg)
+                    await asyncio.sleep(5)
+                except Exception as e:
+                    print(f"  ⚠️  Erro ao postar {nome}: {e}")
+
+        # Painel staff
+        cog_staff = interaction.client.cogs.get("PainelStaffCog")
+        if cog_staff:
+            await asyncio.sleep(5)
+            try:
+                await cog_staff.postar_painel_staff()
+            except Exception as e:
+                print(f"  ⚠️  Erro ao postar painel staff: {e}")
+
+        await interaction.followup.send("✅ Todas as embeds foram postadas!", ephemeral=True)
+
 async def setup(bot):
     await bot.add_cog(UtilidadesCog(bot))
